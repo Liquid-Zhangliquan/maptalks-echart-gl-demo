@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9" />
+    <title></title>
+    <script src="../../js/jquery.js" type="text/javascript"></script>
+    <script src="../../js/maptalks-last.js" type="text/javascript"></script>
+    <script src="../../js/echart.js" type="text/javascript"></script>
+    <script src="../../js/echart-gl.js" type="text/javascript"></script>
+    <script src="../../js/turf.js" type="text/javascript"></script>
+    <style>
+        html,body{
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+  }
+  #main{
+    width: 100%;
+    height: 100%;
+  }
+  </style>
+</head>
+
+<body>
+    <div id="main"></div>
+</body>
+<script type="text/javascript">
+    //origin echart mehudeyi
+    //https://gallery.echartsjs.com/editor.html?c=xH1Vpz2CHm
+    var myChart = echarts.init(document.getElementById('main'));
+    // var uploadedDataURL_Road = "../../data/data-1534143589600-SJRPnoAHQ.json";
+
+    var uploadedDataURL = "../../data/data-1534124434928-H1s9ZDCHm.png";
+    var regionsData;
+    $.getJSON('../../data/wuhan2.json', function (buildingsGeoJSON) {
+        var builds = [];
+        if (buildingsGeoJSON.length !== 0) {
+            builds = buildingsGeoJSON.map(function (feature) {
+                //   feature.properties.name=feature.id;
+                // console.log(feature.properties)
+                return feature;
+            })
+        } else {
+            builds = buildingsGeoJSON.map(function (feature) {
+                return {
+                    "type": "Feature",
+                    "properties": {
+                        "name": Math.random().toString(),
+                        "height": feature.height
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [feature.polygon]
+                    }
+                }
+            })
+        }
+        regionsData = builds.map(function (feature) {
+            let f = {
+                name: feature.FID,
+                value: Math.random() * 1,
+                height: feature.height * 10 + 20,
+                coords: feature.geometry.coordinates,
+            };
+            if (f.height < 30 || isNaN(f.height)) f.height = 30;
+            return f;
+        });
+        initCharts();
+    })
+
+    function initCharts() {
+        myChart.setOption({
+            title: {
+                text: '武汉',
+                textStyle: {
+                    color: '#fff',
+                    fontSize: 45,
+                    align: 'center'
+                }
+            },
+            maptalks3D: {
+                zoom: 13,
+                center: [114.35460420026789, 30.54610631356931],
+                pitch: 55,
+                bearing: -3.6,
+                urlTemplate: 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                postEffect: {
+                    enable: true,
+                    FXAA: {
+                        enable: true
+                    }
+                },
+                light: {
+                    main: {
+                        intensity: 1,
+                        shadow: false,
+                        shadowQuality: 'high'
+                    },
+                    ambient: {
+                        intensity: 0.
+                    },
+                    ambientCubemap: {
+                        texture: '../../data/data-1491838644249-ry33I7YTe.hdr',
+                        exposure: 1,
+                        diffuseIntensity: 0.5,
+                        specularIntensity: 2
+                    }
+                }
+            },
+            series: [{
+                type: 'polygons3D',
+                coordinateSystem: 'maptalks3D',
+                // multiPolygon: true,
+                // map: 'buildings',
+                data: regionsData, //buildsData,
+                shading: 'realistic',
+                instancing: true,
+                silent: true,
+                realisticMaterial: {
+                    metalness: 1,
+                    roughness: 0.4,
+                    textureTiling: 35,
+                    detailTexture: uploadedDataURL
+                }
+            }
+            ]
+        });
+        var map = myChart.getModel().getComponent('maptalks3D').getMaptalks();
+        map.on('click', function (e) {
+            console.log(map.getView());
+        })
+        setTimeout(function () {
+            map.animateTo({
+                zoom: 16,
+                center: [114.32713497387238, 30.54025825897051],
+                pitch: 66.6,
+                bearing: 64.79
+            }, {
+                    duration: 13000
+                })
+        }, 1500)
+
+    }
+
+
+    window.addEventListener('resize', function () {
+        myChart.resize();
+    });
+</script>
+
+</html>
