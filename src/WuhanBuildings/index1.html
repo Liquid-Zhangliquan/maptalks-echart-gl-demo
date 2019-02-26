@@ -64,7 +64,7 @@
             let f = {
                 name: feature.properties.name || feature.properties.id,
                 value: Math.random() * 1,
-                height: feature.properties.height * 2 || feature.properties.levels * 8,
+                height: feature.properties.height * 10 + 20 || feature.properties.levels * 8,
                 coords: feature.geometry.coordinates,
             };
             if (f.height < 30 || isNaN(f.height)) f.height = 30;
